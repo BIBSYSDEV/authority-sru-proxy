@@ -12,10 +12,6 @@ Globals:
       AllowOrigin: '''*'''
 
 Resources:
-  myDomainName:
-    Type: 'AWS::ApiGateway::DomainName'
-    Properties:
-      DomainName: !Ref domainName
   AuthoritySruProxyApi:
     Type: AWS::Serverless::Api
     Properties:
