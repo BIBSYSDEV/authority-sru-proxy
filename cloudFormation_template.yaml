@@ -11,6 +11,11 @@ Globals:
       AllowMethods: '''OPTIONS, GET'''
       AllowOrigin: '''*'''
 
+Parameters:
+  CustomDomain:
+    Type: String
+    Description: Custom API to connect this lambda to
+
 Resources:
   AuthoritySruProxyApi:
     Type: AWS::Serverless::Api
@@ -143,7 +148,7 @@ Resources:
   AuthoritySruProxyBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
     Properties:
-      DomainName: aws.unit.no
+      DomainName: !Ref CustomDomain
       RestApiId: !Ref AuthoritySruProxyApi
       Stage: !Ref AuthoritySruProxyApi.Stage
 
