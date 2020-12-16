@@ -103,20 +103,18 @@ Resources:
             const response = await new Promise((resolve, reject) => {
                 const { queryStringParameters } = event;
                 if (!queryStringParameters || !queryStringParameters.auth_id) {
-                    resolve({
+                    reject({
                         statusCode: 400,
                         body: 'Please provide an auth_id! '
                     });
                 }
-                let url = `https://authority.bibsys.no/authority/rest/sru?operation=searchRetrieve&version=1.2&query=rec.identifier=${queryStringParameters.auth_id}`;
+                const url = `https://authority.bibsys.no/authority/rest/sru?operation=searchRetrieve&version=1.2&query=rec.identifier=${queryStringParameters.auth_id}`;
                 const req = https.get(url,
                     function(res) {
                         res.on('data', chunk => {
                             dataString += chunk;
                         });
                         res.on('end', () => {
-                            console.log('OK');
-                            console.log({ auth_id: queryStringParameters.auth_id });
                             resolve({
                                 statusCode: 200,
                                 headers: {
@@ -130,8 +128,8 @@ Resources:
 
                 req.on('error', (e) => {
                     reject({
-                        statusCode: 500,
-                        body: 'Something went wrong!'
+                        res.statusCode,
+                        res.body
                     });
                 });
             });
