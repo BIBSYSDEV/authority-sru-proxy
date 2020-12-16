@@ -11,6 +11,11 @@ Globals:
       AllowMethods: '''OPTIONS, GET'''
       AllowOrigin: '''*'''
 
+Parameters:
+  CustomDomain:
+    Type: String
+    Description: Custom API to connect this lambda to
+
 Resources:
   AuthoritySruProxyApi:
     Type: AWS::Serverless::Api
