@@ -17,7 +17,6 @@ Resources:
     Properties:
       Name: !Sub "${AWS::StackName}"
       StageName: v1
-      EndpointConfiguration: Regional
       DefinitionBody:
         openapi: 3.0.0
         info:
@@ -143,6 +142,8 @@ Resources:
   AuthoritySruProxyBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
     Properties:
+      BasePath: authority
+      DomainName: marc.aws.unit.no
       RestApiId: !Ref AuthoritySruProxyApi
       Stage: !Ref AuthoritySruProxyApi.Stage
 
