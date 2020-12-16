@@ -15,6 +15,9 @@ Parameters:
   CustomDomain:
     Type: String
     Description: Custom API to connect this lambda to
+  CustomDomainBasePath:
+    Type: String
+    Description: Base path mapping in CustomDomain
 
 Resources:
   AuthoritySruProxyApi:
@@ -148,6 +151,7 @@ Resources:
   AuthoritySruProxyBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
     Properties:
+      BasePath: !Ref CustomDomainBasePath
       DomainName: !Ref CustomDomain
       RestApiId: !Ref AuthoritySruProxyApi
       Stage: !Ref AuthoritySruProxyApi.Stage
