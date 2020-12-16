@@ -143,7 +143,7 @@ Resources:
   AuthoritySruProxyBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
     Properties:
-      DomainName: authority-sru-proxy.aws.unit.no
+      DomainName: aws.unit.no
       RestApiId: !Ref AuthoritySruProxyApi
       Stage: !Ref AuthoritySruProxyApi.Stage
 
