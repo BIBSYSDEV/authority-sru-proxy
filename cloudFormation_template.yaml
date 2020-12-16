@@ -12,14 +12,19 @@ Globals:
       AllowOrigin: '''*'''
 
 Parameters:
-  CustomDomain:
+  basePath:
     Type: String
+    Default: authority
+  domainName:
+    Type: String
+    Default: aws.unit.no
     Description: Custom API to connect this lambda to
-  CustomDomainBasePath:
-    Type: String
-    Description: Base path mapping in CustomDomain
 
 Resources:
+  myDomainName:
+    Type: 'AWS::ApiGateway::DomainName'
+    Properties:
+      DomainName: !Ref domainName
   AuthoritySruProxyApi:
     Type: AWS::Serverless::Api
     Properties:
@@ -151,12 +156,16 @@ Resources:
   AuthoritySruProxyBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
     Properties:
-      BasePath: !Ref CustomDomainBasePath
-      DomainName: !Ref CustomDomain
+      BasePath: !Ref basePath
+      DomainName: !Ref myDomainName
       RestApiId: !Ref AuthoritySruProxyApi
       Stage: !Ref AuthoritySruProxyApi.Stage
 
 Outputs:
+  domainName:
+    Value: !GetAtt
+      - myDomainName
+      - DistributionDomainName
   ApiEndpoint:
     Description: "Endpoint base URL for the API"
     Value: !Sub "https://${AuthoritySruProxyApi}.execute-api.${AWS::Region}.amazonaws.com/${AuthoritySruProxyApi.Stage}/"
