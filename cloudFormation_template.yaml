@@ -1,0 +1,152 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: AWS SAM template with a simple API definition
+
+Globals:
+  Function:
+    Timeout: 20
+  Api:
+    Cors:
+      AllowHeaders: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
+      AllowMethods: '''OPTIONS, GET'''
+      AllowOrigin: '''*'''
+
+Resources:
+  AuthoritySruProxyApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: !Sub "${AWS::StackName}"
+      StageName: v1
+      EndpointConfiguration: Regional
+      DefinitionBody:
+        openapi: 3.0.0
+        info:
+          title: Authority SRU Proxy
+          version: '1.0'
+        paths:
+          /:
+            get:
+              summary: Get record given by auth_id
+              description: gets the record by auth_id
+              parameters:
+                - in: query
+                  name: auth_id
+                  required: true
+                  type: string
+                  description: auth_id.
+              x-amazon-apigateway-integration:
+                uri:
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetAuthoritySruRecordFunction.Arn}/invocations
+                responses: { }
+                httpMethod: POST
+                type: AWS_PROXY
+              responses:
+                '200':
+                  description: title
+                  content:
+                    application/xml:
+                      schema:
+                        $ref: '#/components/schemas/getAuthoritySruRecordResponseBody'
+                '400':
+                  description: Bad request.
+                  content:
+                    application/xml:
+                      schema:
+                        title: 400 Bad request
+                        type: object
+                        properties:
+                          error:
+                            type: string
+                            description: error message
+                '500':
+                  description: Internal server error.
+                  content:
+                    application/xml:
+                      schema:
+                        title: 500 internal server error
+                        type: object
+                        properties:
+                          error:
+                            type: string
+                            description: error message
+
+        components:
+          schemas:
+            getAuthoritySruRecordResponseBody:
+              title: authority record
+              type: object
+              properties:
+                title:
+                  type: string
+                  description: authority record from Authority Registry
+
+  GetAuthoritySruRecordFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      Environment:
+        Variables:
+          ALLOWED_ORIGIN: '*'
+      Events:
+        GetAuthoritySruRecordEvent:
+          Type: Api
+          Properties:
+            Path: /
+            Method: get
+            RestApiId: !Ref AuthoritySruProxyApi
+      Runtime: nodejs12.x
+      Handler: index.handler
+      InlineCode: |
+        const https = require('https');
+        exports.handler = async(event, context, callback) => {
+            console.log(event);
+            let dataString = '';
+            const response = await new Promise((resolve, reject) => {
+                const { queryStringParameters } = event;
+                if (!queryStringParameters || !queryStringParameters.auth_id) {
+                    resolve({
+                        statusCode: 400,
+                        body: 'Please provide an auth_id! '
+                    });
+                }
+                let url = `https://authority.bibsys.no/authority/rest/sru?operation=searchRetrieve&version=1.2&query=rec.identifier=${queryStringParameters.auth_id}`;
+                const req = https.get(url,
+                    function(res) {
+                        res.on('data', chunk => {
+                            dataString += chunk;
+                        });
+                        res.on('end', () => {
+                            console.log('OK');
+                            console.log({ auth_id: queryStringParameters.auth_id });
+                            resolve({
+                                statusCode: 200,
+                                headers: {
+                                    "Access-Control-Allow-Headers": "Content-Type",
+                                    "Access-Control-Allow-Methods": "OPTIONS,GET"
+                                },
+                                body: dataString
+                            });
+                        });
+                    });
+
+                req.on('error', (e) => {
+                    reject({
+                        statusCode: 500,
+                        body: 'Something went wrong!'
+                    });
+                });
+            });
+
+            return response;
+        };
+
+  AuthoritySruProxyBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Properties:
+      RestApiId: !Ref AuthoritySruProxyApi
+      Stage: !Ref AuthoritySruProxyApi.Stage
+
+Outputs:
+  ApiEndpoint:
+    Description: "Endpoint base URL for the API"
+    Value: !Sub "https://${AuthoritySruProxyApi}.execute-api.${AWS::Region}.amazonaws.com/${AuthoritySruProxyApi.Stage}/"
+
