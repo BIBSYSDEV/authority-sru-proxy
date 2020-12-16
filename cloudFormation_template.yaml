@@ -143,6 +143,7 @@ Resources:
   AuthoritySruProxyBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
     Properties:
+      DomainName: !Ref CustomDomain
       RestApiId: !Ref AuthoritySruProxyApi
       Stage: !Ref AuthoritySruProxyApi.Stage
 
