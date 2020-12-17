@@ -406,7 +406,7 @@ Resources:
                 "StackTemplatePath": "${StackTemplatePath}",
                 "StackTemplateConfigurationPath": "${StackTemplateConfigurationPath}",
                 "DeployStackName": "${DeployStackName}",
-                "CodeStarConnectionArn": "${CodeStarConnectionArn}",
+                "CodeStarConnectionArn": "/github-connection",
                 "GitRepo": "${GitRepo}",
                 "GitBranch": "${GitBranch}",
                 "PipelineApprovalAction": "${PipelineApprovalAction}",
