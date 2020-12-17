@@ -236,12 +236,13 @@ Resources:
           Action:
           - 'sts:AssumeRole'
       Policies:
-        - PolicyName: CodePipelineAccess
+        - PolicyName: CloudFormationAccess
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
                 Action:
+                  - apigateway:*
                   - application-autoscaling:*
                   - autoscaling:*
                   - cloudformation:*
