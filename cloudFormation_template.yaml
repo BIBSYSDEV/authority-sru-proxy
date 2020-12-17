@@ -2,6 +2,26 @@ AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
 Description: AWS SAM template with a simple API definition
 
+Parameters:
+  CustomDomain:
+    Type: AWS::SSM::Parameter::Value<String>
+    Default: '/api/domainName'
+    Description: (Optional) Custom domain name for the API endpoint
+  CustomDomainBasePath:
+    Type: String
+    Default: 'authority'
+    Description: (Optional) Base path mapping in CustomDomain
+    AllowedPattern: "^[a-zA-Z0-9$\\-_.+!*'(),]*$"
+    ConstraintDescription: "May contain only letters, numbers and one of $-_.+!*'(),"
+  SruEndpoint:
+    Type: String
+    Description: Url Endpoint to the SRU server
+    Default: 'https://authority.bibsys.no/authority/rest/sru'
+
+Conditions:
+  HasDomainName: !Not [!Equals [!Ref CustomDomain, '']]
+  HasCustomDomainBasePath: !Not [!Equals [!Ref CustomDomainBasePath, '']]
+
 Globals:
   Function:
     Timeout: 20
@@ -10,22 +30,30 @@ Globals:
       AllowHeaders: '''Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'''
       AllowMethods: '''OPTIONS, GET'''
       AllowOrigin: '''*'''
+    EndpointConfiguration: REGIONAL
 
 Resources:
   AuthoritySruProxyApi:
     Type: AWS::Serverless::Api
+    Metadata:
+      cfn_nag:
+        rules_to_suppress:
+          - id: W64
+            reason: "Skip access logging for artifacts bucket"
+          - id: W68
+            reason: "Skip encryption for artifacts bucket"
+          - id: W69
+            reason: "Skip bucket policy for artifacts bucket"
     Properties:
       Name: !Sub "${AWS::StackName}"
       StageName: v1
-      EndpointConfiguration:
-        Type: REGIONAL
       DefinitionBody:
         openapi: 3.0.0
         info:
           title: Authority SRU Proxy
           version: '1.0'
         paths:
-          /authority:
+          /:
             get:
               summary: Get record given by auth_id
               description: gets the record by auth_id
@@ -87,6 +115,7 @@ Resources:
       Environment:
         Variables:
           ALLOWED_ORIGIN: '*'
+          SRU_ENDPOINT: !Ref SruEndpoint
       Events:
         GetAuthoritySruRecordEvent:
           Type: Api
@@ -101,6 +130,7 @@ Resources:
         exports.handler = async(event, context, callback) => {
             console.log(event);
             let dataString = '';
+            let sruEndpoint = process.env.SRU_ENDPOINT
             const response = await new Promise((resolve, reject) => {
                 const { queryStringParameters } = event;
                 if (!queryStringParameters || !queryStringParameters.auth_id) {
@@ -109,7 +139,7 @@ Resources:
                         body: 'Please provide an auth_id! '
                     });
                 }
-                const url = `https://authority.bibsys.no/authority/rest/sru?operation=searchRetrieve&version=1.2&query=rec.identifier=${queryStringParameters.auth_id}`;
+                const url = `${sruEndpoint}?operation=searchRetrieve&version=1.2&query=rec.identifier=${queryStringParameters.auth_id}`;
                 const req = https.get(url,
                     function(res) {
                         res.on('data', chunk => {
@@ -133,7 +163,7 @@ Resources:
                 req.on('error', (e) => {
                     reject({
                         statusCode: 500,
-                        body: e.'Something went wrong!'
+                        body: 'Something went wrong!'
                     });
                 });
             });
@@ -141,8 +171,22 @@ Resources:
             return response;
         };
 
+  AuthoritySruProxyBasePathMapping:
+    Type: AWS::ApiGateway::BasePathMapping
+    Condition: HasDomainName
+    Properties:
+      RestApiId: !Ref AuthoritySruProxyApi
+      Stage: !Ref AuthoritySruProxyApi.Stage
+      DomainName: !Ref CustomDomain
+      BasePath: !If
+        - HasCustomDomainBasePath
+        - !Ref CustomDomainBasePath
+        - !Ref 'AWS::NoValue'
+
 Outputs:
   ApiEndpoint:
     Description: "Endpoint base URL for the API"
-    Value: !Sub "https://${AuthoritySruProxyApi}.execute-api.${AWS::Region}.amazonaws.com/${AuthoritySruProxyApi.Stage}/"
-
+    Value: !If
+      - HasDomainName
+      - !Sub "https://${CustomDomain}/${CustomDomainBasePath}"
+      - !Sub "https://${AuthoritySruProxyApi}.execute-api.${AWS::Region}.amazonaws.com/${AuthoritySruProxyApi.Stage}/"
