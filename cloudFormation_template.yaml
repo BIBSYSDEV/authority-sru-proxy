@@ -25,7 +25,7 @@ Resources:
           title: Authority SRU Proxy
           version: '1.0'
         paths:
-          /:
+          /authority:
             get:
               summary: Get record given by auth_id
               description: gets the record by auth_id
@@ -132,8 +132,8 @@ Resources:
 
                 req.on('error', (e) => {
                     reject({
-                        res.statusCode,
-                        res.body
+                        statusCode: 500,
+                        body: e.'Something went wrong!'
                     });
                 });
             });
