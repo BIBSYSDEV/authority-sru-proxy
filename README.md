@@ -8,6 +8,7 @@ The project consist only of an AWS CloudFormation script. It is ment to:
 Prerequisites:
 * HostedZone: [sandbox|dev|test|prod].bibs.aws.unit.no
 * Create a CodeStarConnection that allows CodePipeline to get events from and read the GitHub repository
+
   The user creating the connection must have permission to create "apps" i GitHub
 * SSM Parameter Store Parameters:
   * /api/domainName = api.[sandbox|dev|test|prod].bibs.aws.unit.no
