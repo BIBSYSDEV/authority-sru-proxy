@@ -26,4 +26,4 @@ Bootstrap:
     * Template: pipeline.yml
     * Name: authority-sru-proxy-pipeline
     * Parameters:
-    * PipelineApprovalEmail=[email address]
+      * PipelineApprovalEmail=[email address]
