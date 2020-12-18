@@ -18,8 +18,8 @@ Prerequisites:
   * Name: apigw-custom-domain-name-api-[sandbox|dev|test|prod]-bibs-aws-unit-no
   * Parameters:
     * HostedZoneId=[ID]
-* Create CloudFormation stack for pipeline. This will bootstrap the app template
-  * Template: pipeline.yaml
+* Create CloudFormation stack for pipeline using the AWS Web Console, CLI or API. This will bootstrap the app template
+  * Template: pipeline.yml
   * Name: authority-sru-proxy-pipeline
   * Parameters:
     * PipelineApprovalEmail=[email address]
