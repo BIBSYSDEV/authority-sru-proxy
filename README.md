@@ -29,5 +29,5 @@ Bootstrap:
       * DeployStackName=authority-sru-proxy
       * GitBranch=develop
       * GitRepo=BIBSYSDEV/authority-sru-proxy
-      * PipelineApprovalAction=[Yes|No]
+      * PipelineApprovalAction=[Yes|No] (No for non-prod?)
       * (Optional) PipelineApprovalEmail=[email address]
