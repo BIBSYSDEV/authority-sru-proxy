@@ -22,7 +22,7 @@ Prerequisites (shared resources):
 
 Bootstrap:
 * Create the following CloudFormation stack manually using the AWS Web Console, CLI or API:
-  * Stack for pipeline. This will bootstrap the app template
+  * Stack for pipeline. This will bootstrap the app stack (template.yml)
     * Template: pipeline.yml
     * Name: authority-sru-proxy-pipeline
     * Parameters:
