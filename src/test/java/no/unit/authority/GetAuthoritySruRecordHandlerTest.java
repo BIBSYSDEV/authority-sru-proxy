@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -72,5 +73,24 @@ public class GetAuthoritySruRecordHandlerTest {
         assertEquals(1, references.size());
         assertEquals(EXPECTED_ID, references.get(0).getId());
         assertEquals(EXPECTED_LINE_PRESENTATION, references.get(0).getLinePresentation());
+    }
+
+    @Test
+    void badRequestIfParametersAreMissing() {
+        Map<String, Object> event = new HashMap<>();
+        GatewayResponse gatewayResponse = mockAlmaRecordHandler.handleRequest(event, null);
+        assertEquals(400, gatewayResponse.getStatusCode());
+        assertTrue(gatewayResponse.getBody().contains(GetAuthoritySruRecordHandler.MANDATORY_PARAMETERS_MISSING));
+
+        Map<String, String> queryParameters = new HashMap<>();
+        event.put(GetAuthoritySruRecordHandler.QUERY_STRING_PARAMETERS_KEY, queryParameters);
+        gatewayResponse = mockAlmaRecordHandler.handleRequest(event, null);
+        assertEquals(400, gatewayResponse.getStatusCode());
+        assertTrue(gatewayResponse.getBody().contains(GetAuthoritySruRecordHandler.MANDATORY_PARAMETERS_MISSING));
+
+        queryParameters.put(GetAuthoritySruRecordHandler.AUTHORITY_ID_KEY, "");
+        gatewayResponse = mockAlmaRecordHandler.handleRequest(event, null);
+        assertEquals(400, gatewayResponse.getStatusCode());
+        assertTrue(gatewayResponse.getBody().contains(GetAuthoritySruRecordHandler.MANDATORY_PARAMETERS_MISSING));
     }
 }

@@ -21,6 +21,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static no.unit.authority.StringUtils.isEmpty;
+
 public class GetAuthoritySruRecordHandler implements RequestHandler<Map<String, Object>, GatewayResponse> {
     public static final String QUERY_STRING_PARAMETERS_KEY = "queryStringParameters";
     public static final String MANDATORY_PARAMETERS_MISSING = "Mandatory parameters 'auth_id' is missing.";
@@ -50,6 +52,12 @@ public class GetAuthoritySruRecordHandler implements RequestHandler<Map<String, 
 
         Map<String, String> queryStringParameters = (Map<String, String>) input.get(QUERY_STRING_PARAMETERS_KEY);
         String authorityId = queryStringParameters.get(AUTHORITY_ID_KEY);
+
+        if(isEmpty(authorityId)) {
+            gatewayResponse.setErrorBody(MANDATORY_PARAMETERS_MISSING);
+            gatewayResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());
+            return gatewayResponse;
+        }
 
         try {
             URL queryUrl = connection.generateQueryUrl(authorityId);
