@@ -22,6 +22,14 @@ public class AuthoritySruConnection {
         return new InputStreamReader(url.openStream());
     }
 
+    /**
+     * Generates URL to query authority sru service for record based on authority ID.
+     *
+     * @param authorityId record id in authority registry
+     * @return URL to query
+     * @throws URISyntaxException When the resulting URI is not valid
+     * @throws MalformedURLException When the resulting URL is not valid
+     */
     public URL generateQueryUrl(String authorityId) throws URISyntaxException, MalformedURLException {
         return new URIBuilder()
                 .setScheme(HTTPS)

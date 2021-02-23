@@ -48,6 +48,7 @@ pmd {
     ruleSetConfig = rootProject.resources.text.fromFile('config/pmd/ruleset.xml')
     ruleSets = []
     ignoreFailures = false
+    toolVersion = "6.31.0"
 }
 
 checkstyle {
