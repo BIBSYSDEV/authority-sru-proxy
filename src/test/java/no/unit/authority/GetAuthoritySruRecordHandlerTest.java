@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.lang.System.lineSeparator;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,16 +28,16 @@ public class GetAuthoritySruRecordHandlerTest {
     public static final String MOCK_SRU_HOST = "authority-sru-host-dot-com";
     public static final String SRU_RESPONSE = "/SRU_response.xml";
     public static final String EXPECTED_ID = "90361304";
-    public static final String EXPECTED_LINE_PRESENTATION = "*ldr 99999nz  a2299999n  4500\n" +
-            "*001 90361304\n" +
-            "*003 NO-TrBIB\n" +
-            "*005 20181018093138.0\n" +
-            "*008 910502n| adz|naabn|         |a|ana|     \n" +
-            "*0247# $ax90361304 $2NO-TrBIB\n" +
-            "*0247# $ahttp://hdl.handle.net/11250/1269159 $2hdl\n" +
-            "*0247# $ahttp://viaf.org/viaf/126209034 $2viaf\n" +
-            "*040## $aNO-TrBIB $bnob $cNO-TrBIB $fnoraf\n" +
-            "*1112# $aNATO Advanced Research Workshop on Movable Bed Physical Models\n" +
+    public static final String EXPECTED_LINE_PRESENTATION = "*ldr 99999nz  a2299999n  4500" + lineSeparator() +
+            "*001 90361304" + lineSeparator() +
+            "*003 NO-TrBIB" + lineSeparator() +
+            "*005 20181018093138.0" + lineSeparator() +
+            "*008 910502n| adz|naabn|         |a|ana|     " + lineSeparator() +
+            "*0247# $ax90361304 $2NO-TrBIB" + lineSeparator() +
+            "*0247# $ahttp://hdl.handle.net/11250/1269159 $2hdl" + lineSeparator() +
+            "*0247# $ahttp://viaf.org/viaf/126209034 $2viaf" + lineSeparator() +
+            "*040## $aNO-TrBIB $bnob $cNO-TrBIB $fnoraf" + lineSeparator() +
+            "*1112# $aNATO Advanced Research Workshop on Movable Bed Physical Models" + lineSeparator() +
             "*901## $akat2";
 
     private AuthoritySruConnection mockConnection;
