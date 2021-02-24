@@ -53,7 +53,7 @@ public class GetAuthoritySruRecordHandler implements RequestHandler<Map<String, 
         Map<String, String> queryStringParameters = (Map<String, String>) input.get(QUERY_STRING_PARAMETERS_KEY);
         String authorityId = queryStringParameters.get(AUTHORITY_ID_KEY);
 
-        if(isEmpty(authorityId)) {
+        if (isEmpty(authorityId)) {
             gatewayResponse.setErrorBody(MANDATORY_PARAMETERS_MISSING);
             gatewayResponse.setStatusCode(Response.Status.BAD_REQUEST.getStatusCode());
             return gatewayResponse;
