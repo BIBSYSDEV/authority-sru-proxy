@@ -1,9 +1,11 @@
 # authority-sru-proxy
-A simple proxy to retrieve authority-records from SRU
 
-The project consist only of an AWS CloudFormation script. It is ment to:
-* set up a Lambda-function. The Lambda-function is an inlineCode nodejs script.
-* and configure the ApiGateway for a GET-request
+The purpose of this project is to fetch an authority-record (publication) by authority ID from the authority registry. 
+Provide the parameter ```auth_id``` to the lambda to retrieve the corresponding record.
+
+The application uses several AWS resources, including Lambda functions and an API Gateway API. These resources are
+defined in the `template.yaml` file in this project. You can update the template to add AWS resources through the same
+deployment process that updates your application code.
 
 Prerequisites (shared resources):
 * HostedZone: [sandbox|dev|test|prod].bibs.aws.unit.no
@@ -24,7 +26,7 @@ Bootstrap:
 * Create the following CloudFormation stack manually using the AWS Web Console, CLI or API:
   * Stack for pipeline/CICD. This will bootstrap the app stack (template.yml)
     * Template: pipeline.yml
-    * Name: authority-sru-proxy-cicd
+    * Name: authority-sru-proxy-pipeline
     * Parameters:
       * DeployStackName=authority-sru-proxy
       * GitBranch=develop
