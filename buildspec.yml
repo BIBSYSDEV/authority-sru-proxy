@@ -7,12 +7,13 @@ phases:
 
   install:
     runtime-versions:
-      nodejs: 12.x
+      java: corretto11
       ruby: 2.6
     commands:
       - pip3 install --upgrade cfn-lint
-      - pip3 install --upgrade aws-sam-cli
-
+      # Upgrade AWS CLI to the latest version
+      # Install aws-sam-cli
+      - pip3 install aws-sam-cli
       # Install cfn_nag
       - gem install cfn-nag
 
@@ -34,14 +35,13 @@ phases:
   build:
     commands:
       - echo Build started on `date`
-      - echo Building Node app...
-
       # Use AWS SAM to build and package the application by using AWS CloudFormation
-#      - sam build
+      - sam build
       - sam package --s3-bucket $S3_BUCKET --output-template-file packaged.yml
 
       # Lint after 'package'
       - cfn-lint packaged.yml
+
   post_build:
     commands:
       - echo Build completed on `date`
