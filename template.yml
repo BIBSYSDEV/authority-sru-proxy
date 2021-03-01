@@ -17,7 +17,7 @@ Parameters:
   SruEndpoint:
     Type: String
     Description: Url Endpoint to the SRU server
-    Default: 'https://authority.bibsys.no/authority/rest/sru'
+    Default: 'authority.bibsys.no/authority/rest/sru'
   MaxConcurrency:
     Type: Number
     Default: 20
