@@ -75,8 +75,8 @@ public class GetAuthoritySruRecordHandler implements RequestHandler<Map<String, 
                 gatewayResponse.setStatusCode(Response.Status.OK.getStatusCode());
             }
         } catch (URISyntaxException | IOException | ParsingException e) {
-            DebugUtils.dumpException(e);
-            gatewayResponse.setErrorBody(INTERNAL_SERVER_ERROR_MESSAGE + " : " + e.getMessage());
+            String exception = DebugUtils.dumpException(e);
+            gatewayResponse.setErrorBody(INTERNAL_SERVER_ERROR_MESSAGE + " : " + exception);
             gatewayResponse.setStatusCode(Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
         }
         return gatewayResponse;
