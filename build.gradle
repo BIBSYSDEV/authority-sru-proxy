@@ -4,6 +4,7 @@ plugins {
     id 'pmd'
     id 'jacoco'
     id 'com.github.johnrengelman.shadow' version '5.2.0'
+    id "org.owasp.dependencycheck" version "6.1.2"
 }
 
 group 'no.unit.marc'
@@ -26,7 +27,6 @@ dependencies {
     implementation group: 'com.github.BIBSYSDEV', name: 'marc21-xml-parser', version: '2.4'
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '3.3.3'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.6.1'
-
     shadowJar {
         archiveClassifier.set('')
         zip64 true
@@ -43,6 +43,10 @@ test {
 // We don't want a jar, just a fatJar
 jar.enabled = false
 project.tasks.build.dependsOn project.tasks.shadowJar
+
+dependencyCheck {
+    failBuildOnCVSS=5
+}
 
 pmd {
     ruleSetConfig = rootProject.resources.text.fromFile('config/pmd/ruleset.xml')
