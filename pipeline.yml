@@ -148,12 +148,12 @@ Resources:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - 'codepipeline.amazonaws.com'
-          Action:
-          - 'sts:AssumeRole'
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'codepipeline.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
       Policies:
         - PolicyName: CodePipelineAccess
           PolicyDocument:
@@ -233,12 +233,12 @@ Resources:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - 'cloudformation.amazonaws.com'
-          Action:
-          - 'sts:AssumeRole'
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'cloudformation.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
       Policies:
         - PolicyName: CloudFormationAccess
           PolicyDocument:
@@ -252,6 +252,7 @@ Resources:
                   - cloudformation:*
                   - cloudwatch:*
                   - codebuild:*
+                  - codedeploy:*
                   - codepipeline:*
                   - ec2:*
                   - ecs:*
@@ -287,37 +288,37 @@ Resources:
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
-        - Effect: Allow
-          Principal:
-            Service:
-            - 'codebuild.amazonaws.com'
-          Action:
-          - 'sts:AssumeRole'
+          - Effect: Allow
+            Principal:
+              Service:
+                - 'codebuild.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
       Policies:
-      - PolicyName: ServiceRole
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-          - Sid: CloudWatchLogsPolicy
-            Effect: Allow
-            Action:
-            - logs:CreateLogGroup
-            - logs:CreateLogStream
-            - logs:PutLogEvents
-            Resource: '*'
-          - Sid: S3GetPutObjects
-            Effect: Allow
-            Action:
-            - s3:GetObject
-            - s3:GetObjectVersion
-            - s3:PutObject
-#            - s3:PutObjectAcl
-            - s3:CreateMultipartUpload
-            - s3:ListMultipartUploadParts
-            - s3:AbortMultipartUpload
-            Resource: !Sub
-            - 'arn:aws:s3:::${BucketName}/*'
-            - BucketName: !Ref ArtifactsBucket
+        - PolicyName: ServiceRole
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Sid: CloudWatchLogsPolicy
+                Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: '*'
+              - Sid: S3GetPutObjects
+                Effect: Allow
+                Action:
+                  - s3:GetObject
+                  - s3:GetObjectVersion
+                  - s3:PutObject
+                  #            - s3:PutObjectAcl
+                  - s3:CreateMultipartUpload
+                  - s3:ListMultipartUploadParts
+                  - s3:AbortMultipartUpload
+                Resource: !Sub
+                  - 'arn:aws:s3:::${BucketName}/*'
+                  - BucketName: !Ref ArtifactsBucket
 
   CodeBuildProject:
     DependsOn: CloudFormationRole # make sure that CloudFormationRole is deleted last
@@ -361,111 +362,111 @@ Resources:
         - Key: 'automation:approval-timeout'
           Value: '1'
       Stages:
-      - Name: Source
-        Actions:
         - Name: Source
-          ActionTypeId:
-            Category: Source
-            Owner: AWS
-            Version: '1'
-            Provider: CodeStarSourceConnection
-          Configuration:
-            ConnectionArn: !Ref CodeStarConnectionArn
-            FullRepositoryId: !Ref GitRepo
-            BranchName: !Ref GitBranch
-            OutputArtifactFormat: "CODE_ZIP"
-          OutputArtifacts: [Name: SourceArtifacts]
-          Namespace: SourceVariables
-          RunOrder: 1
-      - Name: Build
-        Actions:
-        - Name: TestAndBuildApp
-          ActionTypeId:
-            Category: Build
-            Owner: AWS
-            Provider: CodeBuild
-            Version: '1'
-          Configuration:
-            ProjectName: !Ref CodeBuildProject
-          InputArtifacts:
-          - Name: SourceArtifacts
-          OutputArtifacts:
-          - Name: BuildArtifacts
-          RunOrder: 1
-      - Name: UpdatePipeline
-        Actions:
-        - Name: DeployPipeline
-          ActionTypeId:
-            Category: Deploy
-            Owner: AWS
-            Provider: CloudFormation
-            Version: '1'
-          Configuration:
-            ActionMode: REPLACE_ON_FAILURE
-            RoleArn: !GetAtt 'CloudFormationRole.Arn'
-            StackName: !Ref 'AWS::StackName'
-            Capabilities: CAPABILITY_IAM
-            TemplatePath: 'BuildArtifacts::pipeline.yml'
-            ParameterOverrides: !Sub |
-              {
-                "StackTemplatePath": "${StackTemplatePath}",
-                "StackTemplateConfigurationPath": "${StackTemplateConfigurationPath}",
-                "DeployStackName": "${DeployStackName}",
-                "CodeStarConnectionArn": "/github-connection",
-                "GitRepo": "${GitRepo}",
-                "GitBranch": "${GitBranch}",
-                "PipelineApprovalAction": "${PipelineApprovalAction}",
-                "PipelineApprovalEmail": "${PipelineApprovalEmail}",
-                "AlertTopicArn": "${AlertTopicArn}"
-              }
-          InputArtifacts:
-          - Name: BuildArtifacts
-          RunOrder: 1
-      - Name: Release
-        Actions:
-          - Name: CreateChangeSet
-            ActionTypeId:
-              Category: Deploy
-              Owner: AWS
-              Version: '1'
-              Provider: CloudFormation
-            InputArtifacts:
-              - Name: BuildArtifacts
-            Configuration:
-              ActionMode: CHANGE_SET_REPLACE
-              ChangeSetName: !Sub '${AWS::StackName}-Pipeline-changeset'
-              RoleArn: !GetAtt CloudFormationRole.Arn
-              StackName: !Ref DeployStackName
-              Capabilities: CAPABILITY_AUTO_EXPAND,CAPABILITY_NAMED_IAM,CAPABILITY_IAM
-              TemplatePath: 'BuildArtifacts::packaged.yml'
-              TemplateConfiguration: !Sub 'BuildArtifacts::${StackTemplateConfigurationPath}'
-            RunOrder: 1
-          - !If
-            - IsPipelineApprovalActionCondition
-            - Name: ApprovalForRelease
+          Actions:
+            - Name: Source
               ActionTypeId:
-                Category: Approval
+                Category: Source
                 Owner: AWS
                 Version: '1'
-                Provider: Manual
+                Provider: CodeStarSourceConnection
               Configuration:
-                NotificationArn: !Ref PipelineApprovalTopic
-                CustomData: !Sub 'A new change set was created for the ${DeployStackName} stack in account ${AWS::AccountId}. Commit message: "#{SourceVariables.CommitMessage}". Do you want to deploy the changes?'
-                ExternalEntityLink: 'https://aws.unit.no'
-              RunOrder: 2
-            - !Ref AWS::NoValue
-          - Name: ExecuteChangeSet
-            ActionTypeId:
-              Category: Deploy
-              Owner: AWS
-              Version: '1'
-              Provider: CloudFormation
-            Configuration:
-              ActionMode: CHANGE_SET_EXECUTE
-              ChangeSetName: !Sub '${AWS::StackName}-Pipeline-changeset'
-              StackName: !Ref DeployStackName
-              OutputFileName: ChangeSetExecuteOutput.json
-            RunOrder: 3
+                ConnectionArn: !Ref CodeStarConnectionArn
+                FullRepositoryId: !Ref GitRepo
+                BranchName: !Ref GitBranch
+                OutputArtifactFormat: "CODE_ZIP"
+              OutputArtifacts: [Name: SourceArtifacts]
+              Namespace: SourceVariables
+              RunOrder: 1
+        - Name: Build
+          Actions:
+            - Name: TestAndBuildApp
+              ActionTypeId:
+                Category: Build
+                Owner: AWS
+                Provider: CodeBuild
+                Version: '1'
+              Configuration:
+                ProjectName: !Ref CodeBuildProject
+              InputArtifacts:
+                - Name: SourceArtifacts
+              OutputArtifacts:
+                - Name: BuildArtifacts
+              RunOrder: 1
+        - Name: UpdatePipeline
+          Actions:
+            - Name: DeployPipeline
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Provider: CloudFormation
+                Version: '1'
+              Configuration:
+                ActionMode: REPLACE_ON_FAILURE
+                RoleArn: !GetAtt 'CloudFormationRole.Arn'
+                StackName: !Ref 'AWS::StackName'
+                Capabilities: CAPABILITY_IAM
+                TemplatePath: 'BuildArtifacts::pipeline.yml'
+                ParameterOverrides: !Sub |
+                  {
+                    "StackTemplatePath": "${StackTemplatePath}",
+                    "StackTemplateConfigurationPath": "${StackTemplateConfigurationPath}",
+                    "DeployStackName": "${DeployStackName}",
+                    "CodeStarConnectionArn": "/github-connection",
+                    "GitRepo": "${GitRepo}",
+                    "GitBranch": "${GitBranch}",
+                    "PipelineApprovalAction": "${PipelineApprovalAction}",
+                    "PipelineApprovalEmail": "${PipelineApprovalEmail}",
+                    "AlertTopicArn": "${AlertTopicArn}"
+                  }
+              InputArtifacts:
+                - Name: BuildArtifacts
+              RunOrder: 1
+        - Name: Release
+          Actions:
+            - Name: CreateChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              InputArtifacts:
+                - Name: BuildArtifacts
+              Configuration:
+                ActionMode: CHANGE_SET_REPLACE
+                ChangeSetName: !Sub '${AWS::StackName}-Pipeline-changeset'
+                RoleArn: !GetAtt CloudFormationRole.Arn
+                StackName: !Ref DeployStackName
+                Capabilities: CAPABILITY_AUTO_EXPAND,CAPABILITY_NAMED_IAM,CAPABILITY_IAM
+                TemplatePath: 'BuildArtifacts::packaged.yml'
+                TemplateConfiguration: !Sub 'BuildArtifacts::${StackTemplateConfigurationPath}'
+              RunOrder: 1
+            - !If
+              - IsPipelineApprovalActionCondition
+              - Name: ApprovalForRelease
+                ActionTypeId:
+                  Category: Approval
+                  Owner: AWS
+                  Version: '1'
+                  Provider: Manual
+                Configuration:
+                  NotificationArn: !Ref PipelineApprovalTopic
+                  CustomData: !Sub 'A new change set was created for the ${DeployStackName} stack in account ${AWS::AccountId}. Commit message: "#{SourceVariables.CommitMessage}". Do you want to deploy the changes?'
+                  ExternalEntityLink: 'https://aws.unit.no'
+                RunOrder: 2
+              - !Ref AWS::NoValue
+            - Name: ExecuteChangeSet
+              ActionTypeId:
+                Category: Deploy
+                Owner: AWS
+                Version: '1'
+                Provider: CloudFormation
+              Configuration:
+                ActionMode: CHANGE_SET_EXECUTE
+                ChangeSetName: !Sub '${AWS::StackName}-Pipeline-changeset'
+                StackName: !Ref DeployStackName
+                OutputFileName: ChangeSetExecuteOutput.json
+              RunOrder: 3
 
   PipelineFailedNotification:
     Type: 'AWS::Events::Rule'
@@ -483,8 +484,8 @@ Resources:
             - FAILED
       State: ENABLED
       Targets:
-      - Arn: !Ref AlertTopicArn
-        Id: rule
+        - Arn: !Ref AlertTopicArn
+          Id: rule
 
 Outputs:
   ArtifactsBucket:

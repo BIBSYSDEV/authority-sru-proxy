@@ -1,6 +1,7 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: AWS::Serverless-2016-10-31
-Description: AWS SAM template with a simple API definition
+Description: >
+  Sets up lambda, api and base path mapping to fetch records from authority registry
 
 Parameters:
   CustomDomain:
@@ -16,7 +17,17 @@ Parameters:
   SruEndpoint:
     Type: String
     Description: Url Endpoint to the SRU server
-    Default: 'https://authority.bibsys.no/authority/rest/sru'
+    Default: 'authority.bibsys.no/authority/rest/sru'
+  MaxConcurrency:
+    Type: Number
+    Default: 20
+    Description: Max number of provisioned hot instances for a lambda function
+  MinConcurrency:
+    Type: Number
+    Default: 1
+    MaxValue: 1
+    MinValue: 1
+    Description: Min number of provisioned hot instances for a lambda function
 
 Conditions:
   HasDomainName: !Not [!Equals [!Ref CustomDomain, '']]
@@ -33,6 +44,7 @@ Globals:
     EndpointConfiguration: REGIONAL
 
 Resources:
+
   AuthoritySruProxyApi:
     Type: AWS::Serverless::Api
     Metadata:
@@ -47,8 +59,10 @@ Resources:
     Properties:
       Name: !Sub "${AWS::StackName}"
       StageName: v1
+      EndpointConfiguration:
+        Type: REGIONAL
       DefinitionBody:
-        openapi: 3.0.0
+        openapi: 3.0.3
         info:
           title: Authority SRU Proxy
           version: '1.0'
@@ -57,6 +71,10 @@ Resources:
             get:
               summary: Get record given by auth_id
               description: gets the record by auth_id
+              consumes:
+                - application/json
+              produces:
+                - application/json
               parameters:
                 - in: query
                   name: auth_id
@@ -65,21 +83,21 @@ Resources:
                   description: auth_id.
               x-amazon-apigateway-integration:
                 uri:
-                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetAuthoritySruRecordFunction.Arn}/invocations
+                  Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetAuthoritySruRecordFunction.Arn}:live/invocations
                 responses: { }
                 httpMethod: POST
                 type: AWS_PROXY
               responses:
                 '200':
-                  description: title
+                  description: authority record
                   content:
-                    application/xml:
+                    application/json:
                       schema:
                         $ref: '#/components/schemas/getAuthoritySruRecordResponseBody'
                 '400':
                   description: Bad request.
                   content:
-                    application/xml:
+                    application/json:
                       schema:
                         title: 400 Bad request
                         type: object
@@ -90,7 +108,7 @@ Resources:
                 '500':
                   description: Internal server error.
                   content:
-                    application/xml:
+                    application/json:
                       schema:
                         title: 500 internal server error
                         type: object
@@ -116,72 +134,55 @@ Resources:
         Variables:
           ALLOWED_ORIGIN: '*'
           SRU_ENDPOINT: !Ref SruEndpoint
+      Handler: no.unit.authority.GetAuthoritySruRecordHandler::handleRequest
+      Runtime: java11
+      MemorySize: 2048
+      AutoPublishAlias: live
+      DeploymentPreference:
+        Type: AllAtOnce # Or Canary10Percent5Minutes, Linear10PercentEvery1Minute, ...
+      ProvisionedConcurrencyConfig:
+        ProvisionedConcurrentExecutions: 1
       Events:
         GetAuthoritySruRecordEvent:
           Type: Api
           Properties:
-            Path: /
-            Method: get
             RestApiId: !Ref AuthoritySruProxyApi
-      Runtime: nodejs12.x
-      Handler: index.handler
-      InlineCode: |
-        const https = require('https');
-        exports.handler = async(event, context, callback) => {
-            console.log(event);
-            let dataString = '';
-            let sruEndpoint = process.env.SRU_ENDPOINT
-            const response = await new Promise((resolve, reject) => {
-                const { queryStringParameters } = event;
-                if (!queryStringParameters || !queryStringParameters.auth_id) {
-                    reject({
-                        statusCode: 400,
-                        body: 'Please provide an auth_id! '
-                    });
-                }
-                const url = `${sruEndpoint}?operation=searchRetrieve&version=1.2&query=rec.identifier=${queryStringParameters.auth_id}`;
-                const req = https.get(url,
-                    function(res) {
-                        res.on('data', chunk => {
-                            dataString += chunk;
-                        });
-                        res.on('end', () => {
-                            resolve({
-                                statusCode: 200,
-                                headers: {
-                                    "Access-Control-Allow-Headers": "Content-Type",
-                                    "Access-Control-Allow-Methods": "OPTIONS,GET",
-                                    "Access-Control-Allow-Origin" : "*", // Required for CORS support to work
-                                    "Access-Control-Allow-Credentials" : true, // Required for cookies, authorization headers with HTTPS
-                                    "Content-Type" : "application/xml"
-                                },
-                                body: dataString
-                            });
-                        });
-                    });
+            Method: get
+            Path: /
 
-                req.on('error', (e) => {
-                    reject({
-                        statusCode: 500,
-                        body: 'Something went wrong!'
-                    });
-                });
-            });
+  GetAuthoritySruRecordFunctionScalableTarget:
+    Type: AWS::ApplicationAutoScaling::ScalableTarget
+    Properties:
+      MaxCapacity: !Ref MaxConcurrency
+      MinCapacity: !Ref MinConcurrency
+      ResourceId: !Sub function:${GetAuthoritySruRecordFunction}:live # You need to specify an alis or version here
+      RoleARN: !Sub arn:aws:iam::${AWS::AccountId}:role/aws-service-role/lambda.application-autoscaling.amazonaws.com/AWSServiceRoleForApplicationAutoScaling_LambdaConcurrency
+      ScalableDimension: lambda:function:ProvisionedConcurrency
+      ServiceNamespace: lambda
+    DependsOn: GetAuthoritySruRecordFunctionAliaslive # This is your function logical ID + "Alias" + what you use for AutoPublishAlias
 
-            return response;
-        };
+  GetAuthoritySruRecordFunctionScalingPolicy:
+    Type: AWS::ApplicationAutoScaling::ScalingPolicy
+    Properties:
+      PolicyName: GetAuthoritySruRecordFunctionScalingPolicy
+      PolicyType: TargetTrackingScaling
+      ScalingTargetId: !Ref GetAuthoritySruRecordFunctionScalableTarget
+      TargetTrackingScalingPolicyConfiguration:
+        TargetValue: 0.70 # Any value between 0.1 and 0.9 can be used here
+        PredefinedMetricSpecification:
+          PredefinedMetricType: LambdaProvisionedConcurrencyUtilization
 
   AuthoritySruProxyBasePathMapping:
     Type: AWS::ApiGateway::BasePathMapping
     Condition: HasDomainName
     Properties:
-      RestApiId: !Ref AuthoritySruProxyApi
-      Stage: !Ref AuthoritySruProxyApi.Stage
-      DomainName: !Ref CustomDomain
       BasePath: !If
         - HasCustomDomainBasePath
         - !Ref CustomDomainBasePath
         - !Ref 'AWS::NoValue'
+      DomainName: !Ref CustomDomain
+      RestApiId: !Ref AuthoritySruProxyApi
+      Stage: !Ref AuthoritySruProxyApi.Stage
 
 Outputs:
   ApiEndpoint:
