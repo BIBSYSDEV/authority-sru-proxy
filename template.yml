@@ -20,8 +20,8 @@ Parameters:
     Default: 'authority.bibsys.no/authority/rest/sru'
 
 Conditions:
-  HasDomainName: !Not [!Equals [!Ref CustomDomain, '']]
-  HasCustomDomainBasePath: !Not [!Equals [!Ref CustomDomainBasePath, '']]
+  HasDomainName: !Not [ !Equals [ !Ref CustomDomain, '' ] ]
+  HasCustomDomainBasePath: !Not [ !Equals [ !Ref CustomDomainBasePath, '' ] ]
 
 Globals:
   Function:
