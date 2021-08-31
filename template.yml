@@ -126,9 +126,7 @@ Resources:
           SRU_ENDPOINT: !Ref SruEndpoint
       Handler: no.unit.authority.GetAuthoritySruRecordHandler::handleRequest
       Runtime: java11
-      MemorySize: 2048
-      DeploymentPreference:
-        Type: AllAtOnce # Or Canary10Percent5Minutes, Linear10PercentEvery1Minute, ...
+      MemorySize: 1024
       Events:
         GetAuthoritySruRecordEvent:
           Type: Api
