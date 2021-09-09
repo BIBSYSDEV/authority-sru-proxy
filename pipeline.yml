@@ -90,8 +90,8 @@ Parameters:
     AllowedPattern: '(^$|^[_A-Za-z0-9-\+\.]+(\.[_A-Za-z0-9-]+)*@[A-Za-z0-9-]+(\.[A-Za-z0-9]+)*(\.[A-Za-z]{2,})$)'
     ConstraintDescription: Valid email address or empty
   AlertTopicArn:
-#    Type: 'AWS::SSM::Parameter::Value<String>'
-#    Default: '/alert/topicArn'
+    #    Type: 'AWS::SSM::Parameter::Value<String>'
+    #    Default: '/alert/topicArn'
     Type: String
     Default: ''
 
@@ -138,11 +138,11 @@ Resources:
     Properties:
       Subscription: # When adding Subscription, SNS formats the messages before sending
         - !If [HasApprovalEmailAddress, {Endpoint: !Ref PipelineApprovalEmail, Protocol: email}, !Ref 'AWS::NoValue']
-#        - Endpoint: !Ref PipelineApprovalEmail
-#          Protocol: email
+  #        - Endpoint: !Ref PipelineApprovalEmail
+  #          Protocol: email
 
   PipelineRole:
-#    DependsOn: CloudFormationRole # make sure that CloudFormationRole is deleted last
+    #    DependsOn: CloudFormationRole # make sure that CloudFormationRole is deleted last
     Type: 'AWS::IAM::Role'
     Metadata:
       cfn_nag:
@@ -352,9 +352,9 @@ Resources:
       Name: !Sub '${AWS::StackName}-Pipeline'
       RoleArn: !GetAtt PipelineRole.Arn
       RestartExecutionOnUpdate: true
-#      DisableInboundStageTransitions:
-#        - Reason: Approve Step
-#          StageName: Release
+      #      DisableInboundStageTransitions:
+      #        - Reason: Approve Step
+      #          StageName: Release
       ArtifactStore:
         Type: S3
         Location: !Ref ArtifactsBucket
