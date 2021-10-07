@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import static no.unit.authority.StringUtils.isEmpty;
 
 public class GetAuthoritySruRecordHandler implements RequestHandler<Map<String, Object>, GatewayResponse> {
+
     public static final String QUERY_STRING_PARAMETERS_KEY = "queryStringParameters";
     public static final String MANDATORY_PARAMETERS_MISSING = "Mandatory parameters 'auth_id' is missing.";
     public static final String INTERNAL_SERVER_ERROR_MESSAGE = "An error occurred, error has been logged";
