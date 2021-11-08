@@ -56,7 +56,7 @@ pmd {
     ruleSetConfig = rootProject.resources.text.fromFile('config/pmd/ruleset.xml')
     ruleSets = []
     ignoreFailures = false
-    toolVersion = '6.31.0'
+    toolVersion = '6.40.0'
 }
 
 checkstyle {
@@ -81,7 +81,7 @@ jacocoTestReport {
 }
 
 jacoco {
-    toolVersion = "0.8.5"
+    toolVersion = "0.8.7"
 }
 
 check.dependsOn jacocoTestCoverageVerification
