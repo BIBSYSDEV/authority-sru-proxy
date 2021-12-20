@@ -4,7 +4,7 @@ plugins {
     id 'pmd'
     id 'jacoco'
     id 'com.github.johnrengelman.shadow' version '6.1.0'
-    id 'org.owasp.dependencycheck' version '6.5.0.1'
+    id 'org.owasp.dependencycheck' version '6.5.1'
     id 'nebula.lint' version '17.5.0'
 }
 
@@ -19,6 +19,10 @@ repositories {
     maven { url 'https://jitpack.io' }
 }
 
+wrapper {
+    distributionType = Wrapper.DistributionType.ALL
+    gradleVersion = "7.3.1"
+}
 
 dependencies {
     implementation group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.13'
@@ -26,7 +30,7 @@ dependencies {
     implementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.9'
     implementation group: 'com.github.BIBSYSDEV', name: 'marc21-xml-parser', version: '2.11.5'
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.1.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.2.0'
     testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.8.1'
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.8.1'
 
