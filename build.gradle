@@ -4,7 +4,7 @@ plugins {
     id 'pmd'
     id 'jacoco'
     id 'com.github.johnrengelman.shadow' version '6.1.0'
-    id 'org.owasp.dependencycheck' version '7.1.2'
+    id 'org.owasp.dependencycheck' version '7.2.1'
     id 'nebula.lint' version '17.7.0'
 }
 
@@ -30,9 +30,9 @@ dependencies {
     implementation group: 'com.amazonaws', name: 'aws-lambda-java-core', version: '1.2.1'
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.9.1'
     implementation group: 'com.github.BIBSYSDEV', name: 'marc21-xml-parser', version: '2.11.5'
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.7.0'
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.9.0'
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.9.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '4.8.0'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.9.1'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.9.1'
 
     shadowJar {
         archiveClassifier.set('')
