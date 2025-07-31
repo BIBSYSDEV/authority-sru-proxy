@@ -125,7 +125,7 @@ Resources:
           ALLOWED_ORIGIN: '*'
           SRU_ENDPOINT: !Ref SruEndpoint
       Handler: no.unit.authority.GetAuthoritySruRecordHandler::handleRequest
-      Runtime: java11
+      Runtime: java21
       MemorySize: 1024
       Events:
         GetAuthoritySruRecordEvent:
