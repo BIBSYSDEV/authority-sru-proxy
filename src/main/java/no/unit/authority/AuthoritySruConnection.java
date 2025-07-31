@@ -1,12 +1,11 @@
 package no.unit.authority;
 
-import org.apache.http.client.utils.URIBuilder;
-
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
+import org.apache.hc.core5.net.URIBuilder;
 
 public class AuthoritySruConnection {
 

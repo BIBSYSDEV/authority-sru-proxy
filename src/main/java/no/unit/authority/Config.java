@@ -1,6 +1,6 @@
 package no.unit.authority;
 
-public class Config {
+public final class Config {
 
     public static final String MISSING_ENVIRONMENT_VARIABLES = "Missing environment variables SRU_ENDPOINT";
     public static final String CORS_ALLOW_ORIGIN_HEADER_ENVIRONMENT_NAME = "ALLOWED_ORIGIN";
@@ -12,7 +12,7 @@ public class Config {
     private Config() {
     }
 
-    private static class LazyHolder {
+    private static final class LazyHolder {
 
         private static final Config INSTANCE = new Config();
 

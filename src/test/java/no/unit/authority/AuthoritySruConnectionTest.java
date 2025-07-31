@@ -12,7 +12,7 @@ import java.net.URL;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class AuthoritySruConnectionTest {
+public class AuthoritySruConnectionTest {
 
     public static final String SRU_RESPONSE = "/SRU_response.xml";
     public static final String MOCK_AUTH_ID = "90361304";
@@ -34,6 +34,7 @@ class AuthoritySruConnectionTest {
 
     @Test
     public void testGenerateQueryByAuthIdUrl() throws MalformedURLException, URISyntaxException {
+        Config.getInstance().setAuthoritySruHost("example.com");
         URL url = authoritySruConnection.generateQueryUrl(MOCK_AUTH_ID);
         assertTrue(url.getQuery().endsWith("query=rec.identifier%3D" + MOCK_AUTH_ID));
     }
