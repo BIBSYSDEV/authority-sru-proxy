@@ -1,6 +1,11 @@
 package no.unit.authority;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 public final class Config {
+
+    private static final Logger logger = LoggerFactory.getLogger(Config.class);
 
     public static final String MISSING_ENVIRONMENT_VARIABLES = "Missing environment variables SRU_ENDPOINT";
     public static final String CORS_ALLOW_ORIGIN_HEADER_ENVIRONMENT_NAME = "ALLOWED_ORIGIN";
@@ -17,6 +22,9 @@ public final class Config {
         private static final Config INSTANCE = new Config();
 
         static {
+            logger.info("Initializing Config... SRU_ENDPOINT: {} and ALLOWED_ORIGIN: {}",
+                        System.getenv(SRU_ENDPOINT_KEY),
+                        System.getenv(CORS_ALLOW_ORIGIN_HEADER_ENVIRONMENT_NAME));
             INSTANCE.setAuthoritySruHost(System.getenv(SRU_ENDPOINT_KEY));
             INSTANCE.setCorsHeader(System.getenv(CORS_ALLOW_ORIGIN_HEADER_ENVIRONMENT_NAME));
         }
