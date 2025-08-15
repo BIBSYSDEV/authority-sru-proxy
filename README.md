@@ -33,3 +33,9 @@ Bootstrap:
       * GitRepo=BIBSYSDEV/authority-sru-proxy
       * PipelineApprovalAction=[Yes|No] (No for non-prod?)
       * (Optional) PipelineApprovalEmail=[email address]
+
+# API-documentation
+
+To see API-documentation in a interactive Swagger UI. Click [here](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/BIBSYSDEV/authority-sru-proxy/ts-46-openapi-in-own-file/docs/openapi.yaml).
+
+You can also edit or explore OpenApi-specification with [Swagger Editor](https://editor.swagger.io/) by importing this URL: https://raw.githubusercontent.com/BIBSYSDEV/authority-sru-proxy/ts-46-openapi-in-own-file/docs/openapi.yaml
