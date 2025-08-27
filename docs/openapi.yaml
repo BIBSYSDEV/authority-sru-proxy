@@ -1,0 +1,103 @@
+openapi: 3.0.3
+info:
+  title: Authority SRU Proxy
+  description: Fetch an authority-record (publication) by authority ID from the authority registry
+  version: '1.0'
+  contact:
+    email: kontakt@sikt.no
+servers:
+  - url: https://api.sandbox.bibs.aws.unit.no/authority
+  - url: https://api.bibs.aws.unit.no/authority
+paths:
+  /:
+    get:
+      summary: Get record given by auth_id
+      description: gets the record by auth_id
+      tags:
+        - Record
+      parameters:
+        - in: query
+          name: auth_id
+          required: true
+          schema:
+            type: string
+          example: '1093967'
+          description: auth_id.
+      x-amazon-apigateway-integration:
+        uri:
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${GetAuthoritySruRecordFunction.Arn}/invocations
+        responses: { }
+        httpMethod: POST
+        type: AWS_PROXY
+      responses:
+        '200':
+          description: authority record
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/getAuthoritySruRecordResponseBody'
+        '400':
+          description: Bad request.
+          content:
+            application/json:
+              schema:
+                title: 400 Bad request
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: error message
+        '500':
+          description: Internal server error.
+          content:
+            application/json:
+              schema:
+                title: 500 internal server error
+                type: object
+                properties:
+                  error:
+                    type: string
+                    description: error message
+
+components:
+  schemas:
+    getAuthoritySruRecordResponseBody:
+      title: authority record
+      type: array
+      items:
+        type: object
+        properties:
+          id:
+            type: string
+            description: The unique identifier for the record
+            example: "1093967"
+          authors:
+            type: array
+            description: A list of authors
+            items:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the author
+                  example: "Fisher, Jude"
+          xmlPresentation:
+            type: string
+            description: The XML representation of the record
+            format: xml
+            example: |
+              <record xmlns:marc="info:lc/xmlns/marcxchange-v1" format="MARC21" id="1093967" type="Authority">
+                <leader>99999nz  a2299999n  4500</leader>
+                <controlfield tag="001">1093967</controlfield>
+                <!-- More XML content here -->
+              </record>
+          linePresentation:
+            type: string
+            description: The line-based representation of the record
+            example: |
+              *ldr 99999nz  a2299999n  4500
+              *001 1093967
+              *003 NO-TrBIB
+              *005 20240415100400.0
+              *008 141210n| adz|naabn|         |a|ana|     
+              *0247# $ax01093967 $2NO-TrBIB
