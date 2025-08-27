@@ -3,7 +3,6 @@ plugins {
     id 'checkstyle'
     id 'pmd'
     id 'jacoco'
-    id 'com.github.johnrengelman.shadow' version '8.1.1'
     id 'nebula.lint' version '20.6.2'
 }
 
@@ -43,11 +42,6 @@ dependencies {
     testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.11.4'
 }
 
-shadowJar {
-    archiveClassifier.set('')
-    zip64 true
-}
-
 gradleLint {
     rules = ['all-dependency']
     reportFormat = 'html'
@@ -61,13 +55,6 @@ tasks.named('test') {
         events 'skipped', 'failed'
     }
     finalizedBy jacocoTestReport
-}
-
-tasks.named('jar').configure {
-    enabled = false
-}
-tasks.named('build').configure {
-    dependsOn tasks.named('shadowJar')
 }
 
 pmd {
