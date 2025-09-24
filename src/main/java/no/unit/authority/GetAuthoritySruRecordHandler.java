@@ -5,11 +5,11 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import jakarta.ws.rs.core.Response;
 import no.unit.marc.ParsingException;
 import no.unit.marc.Reference;
 import no.unit.marc.SearchRetrieveResponseParser;
 
-import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;

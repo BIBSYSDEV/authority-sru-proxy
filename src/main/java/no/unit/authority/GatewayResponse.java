@@ -2,9 +2,9 @@ package no.unit.authority;
 
 import com.google.gson.JsonObject;
 
-import javax.ws.rs.core.HttpHeaders;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.HttpHeaders;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -15,7 +15,7 @@ public class GatewayResponse {
 
     public static final String CORS_ALLOW_ORIGIN_HEADER = "Access-Control-Allow-Origin";
     public static final String EMPTY_JSON = "{}";
-    public static final transient String ERROR_KEY = "error";
+    public static final String ERROR_KEY = "error";
     private String body;
     private transient Map<String, String> headers;
     private int statusCode;
@@ -32,6 +32,7 @@ public class GatewayResponse {
     /**
      * GatewayResponse convenience constructor to set response status and body with payload direct.
      */
+    @SuppressWarnings("unused")
     public GatewayResponse(final String body, final int status) {
         this.statusCode = status;
         this.body = body;
@@ -42,6 +43,7 @@ public class GatewayResponse {
         return body;
     }
 
+    @SuppressWarnings("unused")
     public Map<String, String> getHeaders() {
         return headers;
     }

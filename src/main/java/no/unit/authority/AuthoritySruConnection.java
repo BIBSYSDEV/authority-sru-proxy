@@ -1,5 +1,6 @@
 package no.unit.authority;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
@@ -27,7 +28,7 @@ public class AuthoritySruConnection {
 
     public InputStreamReader connect(URL url) throws IOException {
         logger.info(CONNECTING_TO, url.toString());
-        return new InputStreamReader(url.openStream());
+        return new InputStreamReader(url.openStream(), UTF_8);
     }
 
     /**
