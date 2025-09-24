@@ -37,9 +37,9 @@ dependencies {
     runtimeOnly group: 'org.apache.logging.log4j', name: 'log4j-slf4j2-impl', version: '2.25.2'
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.20.0'
     testImplementation group: 'org.hamcrest', name: 'hamcrest', version: '3.0'
-    // '5.11.4' is latest working version for jupiter
-    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.11.4'
-    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter-engine', version: '5.11.4'
+    testImplementation group: 'org.junit.jupiter', name: 'junit-jupiter-api', version: '5.13.4'
+    testRuntimeOnly group: 'org.junit.jupiter', name: 'junit-jupiter', version: '5.13.4'
+    testRuntimeOnly group: 'org.junit.platform', name: 'junit-platform-launcher', version: '1.13.4'
 }
 
 gradleLint {
