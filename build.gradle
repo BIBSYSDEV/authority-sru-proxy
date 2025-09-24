@@ -58,14 +58,14 @@ tasks.named('test') {
 }
 
 pmd {
-    toolVersion = '7.13.0'
+    toolVersion = '7.17.0'
     ruleSetConfig = rootProject.resources.text.fromFile('config/pmd/ruleset.xml')
     ruleSets = []
     ignoreFailures = false
 }
 
 checkstyle {
-    toolVersion = '10.24.0'
+    toolVersion = '10.26.1'
     configFile = rootProject.resources.text.fromFile('config/checkstyle/checkstyle.xml').asFile()
     showViolations = true
 }
