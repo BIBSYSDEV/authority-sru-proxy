@@ -8,9 +8,13 @@ info:
 servers:
   - url: https://api.sandbox.bibs.aws.unit.no/authority
   - url: https://api.bibs.aws.unit.no/authority
+tags:
+  - name: Record
+    description: A SRU Record
 paths:
   /:
     get:
+      operationId: getRecordByAuthId
       summary: Get record given by auth_id
       description: gets the record by auth_id
       tags:
