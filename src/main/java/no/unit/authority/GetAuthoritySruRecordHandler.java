@@ -5,11 +5,11 @@ import com.amazonaws.services.lambda.runtime.RequestHandler;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
+import jakarta.ws.rs.core.Response;
 import no.unit.marc.ParsingException;
 import no.unit.marc.Reference;
 import no.unit.marc.SearchRetrieveResponseParser;
 
-import javax.ws.rs.core.Response;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -20,15 +20,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import static no.unit.authority.StringUtils.isEmpty;
 
 public class GetAuthoritySruRecordHandler implements RequestHandler<Map<String, Object>, GatewayResponse> {
 
+    private static final Logger logger = LoggerFactory.getLogger(GetAuthoritySruRecordHandler.class);
+
     public static final String QUERY_STRING_PARAMETERS_KEY = "queryStringParameters";
     public static final String MANDATORY_PARAMETERS_MISSING = "Mandatory parameters 'auth_id' is missing.";
     public static final String INTERNAL_SERVER_ERROR_MESSAGE = "An error occurred, error has been logged";
     public static final String AUTHORITY_ID_KEY = "auth_id";
+    public static final String GETTING_RECORD_WITH_AUTH_ID = "Getting Authority Sru Record with auth_id {}";
 
     protected final transient AuthoritySruConnection connection;
 
@@ -36,6 +41,7 @@ public class GetAuthoritySruRecordHandler implements RequestHandler<Map<String, 
         this.connection = connection;
     }
 
+    @SuppressWarnings("unused")
     public GetAuthoritySruRecordHandler() {
         this.connection = new AuthoritySruConnection();
     }
@@ -61,6 +67,7 @@ public class GetAuthoritySruRecordHandler implements RequestHandler<Map<String, 
         }
 
         try {
+            logger.info(GETTING_RECORD_WITH_AUTH_ID, authorityId);
             URL queryUrl = connection.generateQueryUrl(authorityId);
             List<Reference> referenceObjects;
             try (InputStreamReader streamReader = connection.connect(queryUrl)) {
