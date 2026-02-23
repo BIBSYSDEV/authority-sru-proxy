@@ -24,15 +24,12 @@ public class GatewayResponse {
      * GatewayResponse contains response status, response headers and body with payload resp. error messages.
      */
     public GatewayResponse() {
-        this.statusCode = Response.Status.INTERNAL_SERVER_ERROR.getStatusCode();
-        this.body = EMPTY_JSON;
-        this.generateDefaultHeaders();
+        this(EMPTY_JSON, Response.Status.INTERNAL_SERVER_ERROR.getStatusCode());
     }
 
     /**
      * GatewayResponse convenience constructor to set response status and body with payload direct.
      */
-    @SuppressWarnings("unused")
     public GatewayResponse(final String body, final int status) {
         this.statusCode = status;
         this.body = body;

@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
+import nva.commons.core.JacocoGenerated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,6 +43,7 @@ public class GetAuthoritySruRecordHandler implements RequestHandler<Map<String, 
     }
 
     @SuppressWarnings("unused")
+    @JacocoGenerated
     public GetAuthoritySruRecordHandler() {
         this.connection = new AuthoritySruConnection();
     }
