@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
@@ -34,16 +33,22 @@ public class AuthoritySruConnectionTest {
 
     @Test
     public void testConnect() throws IOException {
-        final URL localFileUrl = AuthoritySruConnectionTest.class.getResource(SRU_RESPONSE);
-        final InputStreamReader streamReader = authoritySruConnection.connect(localFileUrl);
-        assertNotNull(streamReader);
-        streamReader.close();
+        var localFileUrl = AuthoritySruConnectionTest.class.getResource(SRU_RESPONSE);
+
+        if (localFileUrl == null) {
+            throw new IllegalStateException("SRU_RESPONSE resource not found: " + SRU_RESPONSE);
+        }
+
+        try (InputStreamReader streamReader = authoritySruConnection.connect(localFileUrl)) {
+            assertNotNull(streamReader);
+        }
     }
 
     @Test
     public void testGenerateQueryByAuthIdUrl() throws MalformedURLException, URISyntaxException {
         Config.getInstance().setAuthoritySruHost("example.com");
-        URL url = authoritySruConnection.generateQueryUrl(MOCK_AUTH_ID);
+        var url = authoritySruConnection.generateQueryUrl(MOCK_AUTH_ID);
+
         assertTrue(url.getQuery().endsWith("query=rec.identifier%3D" + MOCK_AUTH_ID));
     }
 
@@ -51,10 +56,12 @@ public class AuthoritySruConnectionTest {
     public void shouldUseCorrectUrlSyntaxWhenGeneratingQueryUrl() throws MalformedURLException, URISyntaxException {
         Config.getInstance().setAuthoritySruHost(SRU_ENDPOINT);
         var urlWithBasePath = authoritySruConnection.generateQueryUrl(MOCK_AUTH_ID);
+
         assertThat(urlWithBasePath.toString(), equalTo(AUTHORITY_FULL_URL));
 
         Config.getInstance().setAuthoritySruHost(SRU_ENDPOINT_WITHOUT_BASE_PATH);
         var urlWithoutBasePath = authoritySruConnection.generateQueryUrl(MOCK_AUTH_ID);
+
         assertThat(urlWithoutBasePath.toString(), equalTo(AUTHORITY_FULL_URL_WITHOUT_BASE_PATH));
     }
 

@@ -1,6 +1,5 @@
 package no.unit.authority;
 
-import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.reflect.TypeToken;
 import no.unit.marc.Reference;
@@ -8,7 +7,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.lang.reflect.Type;
 import java.util.HashMap;
@@ -16,9 +14,16 @@ import java.util.List;
 import java.util.Map;
 
 import static java.lang.System.lineSeparator;
+import static java.net.HttpURLConnection.HTTP_INTERNAL_ERROR;
+import static no.unit.authority.GetAuthoritySruRecordHandler.AUTHORITY_ID_KEY;
+import static no.unit.authority.GetAuthoritySruRecordHandler.QUERY_STRING_PARAMETERS_KEY;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -58,40 +63,59 @@ public class GetAuthoritySruRecordHandlerTest {
     @Test
     void getsAuthoritySruRecord() throws IOException {
         Map<String, String> queryParameters = new HashMap<>();
-        queryParameters.put(GetAuthoritySruRecordHandler.AUTHORITY_ID_KEY, MOCK_AUTHORITY_ID);
+        queryParameters.put(AUTHORITY_ID_KEY, MOCK_AUTHORITY_ID);
         Map<String, Object> event = new HashMap<>();
-        event.put(GetAuthoritySruRecordHandler.QUERY_STRING_PARAMETERS_KEY, queryParameters);
+        event.put(QUERY_STRING_PARAMETERS_KEY, queryParameters);
 
-        InputStream stream = GetAuthoritySruRecordHandlerTest.class.getResourceAsStream(SRU_RESPONSE);
+        var stream = GetAuthoritySruRecordHandlerTest.class.getResourceAsStream(SRU_RESPONSE);
         when(mockConnection.connect(any())).thenReturn(new InputStreamReader(stream));
 
-        final GatewayResponse gatewayResponse = mockAlmaRecordHandler.handleRequest(event, null);
+        var gatewayResponse = mockAlmaRecordHandler.handleRequest(event, null);
 
-        Gson gson = new GsonBuilder().setPrettyPrinting().create();
+        var gson = new GsonBuilder().setPrettyPrinting().create();
         Type listOfMyClassObject = new TypeToken<List<Reference>>() {}.getType();
         List<Reference> references = gson.fromJson(gatewayResponse.getBody(), listOfMyClassObject);
 
         assertEquals(1, references.size());
-        assertEquals(EXPECTED_ID, references.get(0).getId());
-        assertEquals(EXPECTED_LINE_PRESENTATION, references.get(0).getLinePresentation());
+        assertEquals(EXPECTED_ID, references.getFirst().getId());
+        assertEquals(EXPECTED_LINE_PRESENTATION, references.getFirst().getLinePresentation());
     }
 
     @Test
     void badRequestIfParametersAreMissing() {
         Map<String, Object> event = new HashMap<>();
-        GatewayResponse gatewayResponse = mockAlmaRecordHandler.handleRequest(event, null);
+        var gatewayResponse = mockAlmaRecordHandler.handleRequest(event, null);
+
         assertEquals(400, gatewayResponse.getStatusCode());
         assertTrue(gatewayResponse.getBody().contains(GetAuthoritySruRecordHandler.MANDATORY_PARAMETERS_MISSING));
 
         Map<String, String> queryParameters = new HashMap<>();
-        event.put(GetAuthoritySruRecordHandler.QUERY_STRING_PARAMETERS_KEY, queryParameters);
+        event.put(QUERY_STRING_PARAMETERS_KEY, queryParameters);
         gatewayResponse = mockAlmaRecordHandler.handleRequest(event, null);
+
         assertEquals(400, gatewayResponse.getStatusCode());
         assertTrue(gatewayResponse.getBody().contains(GetAuthoritySruRecordHandler.MANDATORY_PARAMETERS_MISSING));
 
-        queryParameters.put(GetAuthoritySruRecordHandler.AUTHORITY_ID_KEY, "");
+        queryParameters.put(AUTHORITY_ID_KEY, "");
         gatewayResponse = mockAlmaRecordHandler.handleRequest(event, null);
+
         assertEquals(400, gatewayResponse.getStatusCode());
         assertTrue(gatewayResponse.getBody().contains(GetAuthoritySruRecordHandler.MANDATORY_PARAMETERS_MISSING));
+    }
+
+    @Test
+    void shouldReturnInternalErrorWhenUpstreamConnectionFails() throws IOException {
+        Map<String, String> queryParameters = new HashMap<>();
+        queryParameters.put(AUTHORITY_ID_KEY, MOCK_AUTHORITY_ID);
+        Map<String, Object> event = new HashMap<>();
+        event.put(QUERY_STRING_PARAMETERS_KEY, queryParameters);
+
+        doThrow(IOException.class).when(mockConnection).connect(any());
+
+        var gatewayResponse = mockAlmaRecordHandler.handleRequest(event, null);
+
+        assertThat(gatewayResponse.getStatusCode(), equalTo(HTTP_INTERNAL_ERROR));
+        assertThat(gatewayResponse.getBody(), containsString("An error occurred, error has been logged"));
+        assertThat(gatewayResponse.getBody(), containsString("IOException"));
     }
 }
