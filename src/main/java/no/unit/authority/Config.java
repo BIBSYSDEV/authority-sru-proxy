@@ -1,5 +1,6 @@
 package no.unit.authority;
 
+import nva.commons.core.JacocoGenerated;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -39,14 +40,12 @@ public final class Config {
 
     /**
      * Checking if authoritySruHost is present.
-     *
-     * @return <code>TRUE</code> if property is present.
      */
-    public boolean checkProperties() {
+    @JacocoGenerated
+    public void checkProperties() {
         if (StringUtils.isEmpty(authoritySruHost)) {
             throw new RuntimeException(MISSING_ENVIRONMENT_VARIABLES);
         }
-        return true;
     }
 
     public void setAuthoritySruHost(String authoritySruHost) {
