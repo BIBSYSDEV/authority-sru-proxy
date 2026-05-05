@@ -3,10 +3,14 @@ package no.unit.authority;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-public class DebugUtils {
+public final class DebugUtils {
 
     public static final String NEWLINE = "\n";
     public static final String CARRIAGE_RETURN = "\r";
+
+    private DebugUtils() {
+
+    }
 
     /**
      * Writes a stackTrace into a string.
