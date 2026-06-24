@@ -22,7 +22,7 @@ public final class Config {
 
         private static final Config INSTANCE = new Config();
 
-        public static final String INITIALIZING_CONFIG =
+        private static final String INITIALIZING_CONFIG =
             "Initializing Config... SRU_ENDPOINT: {} and ALLOWED_ORIGIN: {}";
 
         static {
