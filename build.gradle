@@ -30,7 +30,7 @@ dependencies {
     implementation "com.amazonaws:aws-lambda-java-core:1.4.0"
     implementation "com.google.code.gson:gson:2.14.0"
     implementation "com.github.BIBSYSDEV:marc21-xml-parser:2.11.5"
-    implementation "org.slf4j:slf4j-api:2.0.18"
+    implementation "org.slf4j:slf4j-api:2.0.20"
     implementation "commons-io:commons-io:2.17.0"// Forcing newer version being used in marc21-xml-parser
     implementation "com.github.bibsysdev:core:2.8.2"
     runtimeOnly "com.amazonaws:aws-lambda-java-log4j2:1.6.4"
