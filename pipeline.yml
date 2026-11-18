@@ -74,7 +74,7 @@ Parameters:
   GitHubConnectionArn:
     Description: SSM parameter holding the ARN of the CodeConnections (GitHub App) connection used by CodePipeline to read the repo
     Type: AWS::SSM::Parameter::Value<String>
-    Default: /github-connection
+    Default: github-connection
   GitHubOwner:
     Description: GitHub organization owning the repo
     Type: String
